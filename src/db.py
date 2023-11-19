@@ -18,7 +18,7 @@ class Users(db.Model):
     seshs = db.relationship("Seshs", secondary = assoc_table, back_populates = "users")
     
     
-    def __init__(self, *kwargs):
+    def __init__(self, **kwargs):
         """Initializes a new user object
         """
         self.netid = kwargs.get("netid")
@@ -61,7 +61,7 @@ class Seshs(db.Model):
     users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
     
     
-    def __init__(self, *kwargs):
+    def __init__(self, **kwargs):
         """Initializes a new user object"""
         self.title = kwargs.get("title")
         self.course = kwargs.get("course")
