@@ -28,7 +28,7 @@ def get_sessions():
 @app.route("/api/sessions/", methods = ["POST"])
 def create_session():
     """
-    endpoint for adding a course
+    endpoint for adding a session
     """
     body = json.loads(request.data)
     title = body.get("title")
@@ -55,6 +55,19 @@ def create_session():
     db.session.add(new_session)
     db.session.commit()
     return json.dumps(new_session.simple_serialize()), 201
+
+@app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["DELETE"])
+def delete_session(session_id, user_id):
+    """
+    Endpoint for deleting a session from a users sessions
+    """
+    session = Seshs.query.filter_by(id=session_id).first()
+    user = Users.query.filter_by(id=user_id).first()
+    if session is None or user is None:
+        return json.dumps({"error": "Session or User not found!"}), 404
+    user.seshs.remove(session)
+    db.users.commit()
+    return json.dumps(session.simple_serialize()), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
