@@ -4,7 +4,7 @@ db = SQLAlchemy()
 
 assoc_table = db.Table("assoc", db.Model.metadata,
                        db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
-                       db.Column("sesh_id", db.Integer, db.ForeignKey("sesh.id"))
+                       db.Column("sesh_id", db.Integer, db.ForeignKey("seshs.id"))
                        )
 
 class Users(db.Model):
@@ -45,7 +45,7 @@ class Users(db.Model):
         }
         
            
-class Seshs:
+class Seshs(db.Model):
     """A class for creating Seshs table
     """
     __tablename__ = "seshs"
