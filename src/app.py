@@ -4,7 +4,7 @@ from db import Users, Seshs
 from flask import Flask, request
 
 app = Flask(__name__)
-db_filename = "cms.db"
+db_filename = "sessions.db"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
