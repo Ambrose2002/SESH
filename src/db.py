@@ -28,6 +28,11 @@ class Users(db.Model):
         
     def serialize(self):
         """Returns a serialized users object"""
+        return {
+            "id": self.id,
+            "netid": self.netid,
+            "email": self.email         
+        }
         
         
     
@@ -57,10 +62,20 @@ class Seshs:
         self.start_time = kwargs.get("start_time")
         self.end_time = kwargs.get("end_time")
         self.location = kwargs.get("location")
-        self.number_of_students = kwargs.get("number_of_students")
         self.description = kwargs.get("description", "")
     
     
     def serialize(self):
         """Returns a serialized sesh object"""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "course": self.course,
+            "date": self.date,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "location": self.location,
+            "number_of_students": self.number_of_students,
+            "description": self.description,
+        }
     
