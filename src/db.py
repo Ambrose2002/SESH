@@ -15,7 +15,7 @@ class Users(db.Model):
     netid = db.Column(db.String, nullable = False)
     email = db.Column(db.String, nullable = False)
     password = db.Column(db.String, nullable = False)
-    sesh = db.relationship("Seshs", secondary = assoc_table, back_populates = "users")
+    seshs = db.relationship("Seshs", secondary = assoc_table, back_populates = "users")
     
     
     def __init__(self, *kwargs):
@@ -31,12 +31,20 @@ class Users(db.Model):
         return {
             "id": self.id,
             "netid": self.netid,
-            "email": self.email         
+            "email": self.email,
+            "seshs": [sesh.simple_serialize() for sesh in self.seshs]        
+        }
+      
+        
+    def simple_serialize(self):
+        """Returns a serialized users object without seshs"""
+        return{
+            "id": self.id,
+            "netid": self.netid,
+            "email": self.email
         }
         
-        
-    
-    
+           
 class Seshs:
     """A class for creating Seshs table
     """
@@ -50,12 +58,11 @@ class Seshs:
     location = db.Column(db.String, nullable = False)
     number_of_students = db.Column(db.Integer, nullable = False)
     description = db.Column(db.String, nullable = False)
-    user = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
+    users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
     
     
     def __init__(self, *kwargs):
-        """Initializes a new user object
-        """
+        """Initializes a new user object"""
         self.title = kwargs.get("title")
         self.course = kwargs.get("course")
         self.date = kwargs.get("date")
@@ -67,6 +74,22 @@ class Seshs:
     
     def serialize(self):
         """Returns a serialized sesh object"""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "course": self.course,
+            "date": self.date,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "location": self.location,
+            "number_of_students": self.number_of_students,
+            "description": self.description,
+            "users": [user.simple_serialize() for user in self.users]
+        }
+        
+        
+    def simple_serialize(self):
+        """Returns a serialized sesh object without users"""
         return {
             "id": self.id,
             "title": self.title,
