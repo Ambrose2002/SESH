@@ -15,6 +15,37 @@ with app.app_context():
     db.create_all()
 
 @app.route("/")
+
+
+@app.route("/api/users/")
+def get_users():
+    """Returns a json of all users"""
+    users = [user.serialize() for user in Users.query.all()]
+    return json.dumps(users)
+
+@app.route("/api/users/", methods= ["POST"])
+def create_user():
+    body = json.loads(request.data)
+    netid = body.get("netid")
+    if netid is None:
+        return json.dumps({"error":"Provide netid"}), 400
+    email = body.get("email")
+    if email is None:
+        return json.dumps({"error":"Provide email"}), 400
+    password= body.get("password")
+    if password is None:
+        return json.dumps({"error":"Provide password"}), 400
+
+    user = Users(
+        netid = body.get("netid"),
+        email = body.get("email"), 
+        password = body.get("password")
+    )
+    db.session.add(user)
+    db.session.commit()
+    return json.dumps(user.simple_serialize()), 400
+
+  
 @app.route("/api/sessions/")
 def get_sessions():
     """
@@ -25,6 +56,17 @@ def get_sessions():
         sessions.append(sesh.serialize())
     return json.dumps({"sessions": sessions}), 200
 
+
+@app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
+def create_session(user_id):
+    """
+    endpoint for adding a session
+    """
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None:
+        return json.dumps({"error": "User not found"}), 404
+
+      
 @app.route("/api/sessions/", methods = ["POST"])
 def create_session():
     """
@@ -47,15 +89,22 @@ def create_session():
       title = title,
       course = course,
       date = date, 
+
+      admin = user_id,
+
       start_time = start_time,
       end_time = end_time,
       location = location, 
       description = description
     )
+
+    user.seshs.append(new_session)
+
     db.session.add(new_session)
     db.session.commit()
     return json.dumps(new_session.simple_serialize()), 201
 
+  
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["DELETE"])
 def delete_session(session_id, user_id):
     """

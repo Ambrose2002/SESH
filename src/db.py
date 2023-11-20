@@ -16,11 +16,11 @@ class Users(db.Model):
     email = db.Column(db.String, nullable = False)
     password = db.Column(db.String, nullable = False)
     seshs = db.relationship("Seshs", secondary = assoc_table, back_populates = "users")
+    admins = db.relationship("Seshs", cascade = "delete")
     
     
     def __init__(self, **kwargs):
-        """Initializes a new user object
-        """
+        """Initializes a new user object"""
         self.netid = kwargs.get("netid")
         self.email = kwargs.get("email")
         self.password = kwargs.get("password")
@@ -59,17 +59,22 @@ class Seshs(db.Model):
     number_of_students = db.Column(db.Integer, nullable = True)
     description = db.Column(db.String, nullable = False)
     users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
+    admin = db.Column(db.Integer, db.ForeignKey("users.id"), nullable = False) # represents creator of the sesh
+    population = db.Column(db.Integer, autoincrement = True)
     
     
     def __init__(self, **kwargs):
         """Initializes a new user object"""
         self.title = kwargs.get("title")
+        self.admin = kwargs.get("admin")  # must be set to user_id in constructor
         self.course = kwargs.get("course")
         self.date = kwargs.get("date")
         self.start_time = kwargs.get("start_time")
         self.end_time = kwargs.get("end_time")
         self.location = kwargs.get("location")
         self.description = kwargs.get("description", "")
+        self.population = 1
+        
     
     
     def serialize(self):
@@ -82,7 +87,7 @@ class Seshs(db.Model):
             "start_time": self.start_time,
             "end_time": self.end_time,
             "location": self.location,
-            "number_of_students": self.number_of_students,
+            "population": self.population,
             "description": self.description,
             "users": [user.simple_serialize() for user in self.users]
         }
@@ -98,7 +103,7 @@ class Seshs(db.Model):
             "start_time": self.start_time,
             "end_time": self.end_time,
             "location": self.location,
-            "number_of_students": self.number_of_students,
+            "population": self.population,
             "description": self.description,
         }
     
