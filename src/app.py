@@ -16,7 +16,6 @@ with app.app_context():
 
 @app.route("/")
 
-
 @app.route("/api/users/")
 def get_users():
     """Returns a json of all users"""
@@ -45,7 +44,7 @@ def create_user():
     db.session.commit()
     return json.dumps(user.simple_serialize()), 400
 
-  
+
 @app.route("/api/sessions/")
 def get_sessions():
     """
@@ -56,7 +55,6 @@ def get_sessions():
         sessions.append(sesh.serialize())
     return json.dumps({"sessions": sessions}), 200
 
-
 @app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
 def create_session(user_id):
     """
@@ -65,16 +63,6 @@ def create_session(user_id):
     user = Users.query.filter_by(id = user_id).first()
     if user is None:
         return json.dumps({"error": "User not found"}), 404
-
-      
-@app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
-def create_session(user_id):
-    """
-    endpoint for adding a session
-    """
-    user = Users.query.filter_by(id = user_id).first()
-    if user is None:
-        
     body = json.loads(request.data)
     title = body.get("title")
     course = body.get("course")
@@ -99,12 +87,10 @@ def create_session(user_id):
       description = description
     )
     user.seshs.append(new_session)
-    
     db.session.add(new_session)
     db.session.commit()
     return json.dumps(new_session.simple_serialize()), 201
 
-  
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["DELETE"])
 def delete_session(session_id, user_id):
     """
