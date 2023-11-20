@@ -56,6 +56,7 @@ class Seshs(db.Model):
     start_time = db.Column(db.String, nullable = False)
     end_time = db.Column(db.String, nullable = False)
     location = db.Column(db.String, nullable = False)
+    number_of_students = db.Column(db.Integer, nullable = True)
     description = db.Column(db.String, nullable = False)
     users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
     admin = db.Column(db.Integer, db.ForeignKey("users.id"), nullable = False) # represents creator of the sesh

@@ -50,8 +50,8 @@
         * time
         * location
         * description
-- **DELETE**(drop) out of a study sesh ( will take sesh id as a parameter)
-    - removes student form a study sesh
+- **DELETE**(drop) out of a study sesh ( will take sesh id and user id as a parameter)
+    - removes student from a study sesh
 
 
 2. **SESHS**
