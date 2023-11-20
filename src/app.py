@@ -67,11 +67,14 @@ def create_session(user_id):
         return json.dumps({"error": "User not found"}), 404
 
       
-@app.route("/api/sessions/", methods = ["POST"])
-def create_session():
+@app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
+def create_session(user_id):
     """
     endpoint for adding a session
     """
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None:
+        
     body = json.loads(request.data)
     title = body.get("title")
     course = body.get("course")
@@ -89,17 +92,14 @@ def create_session():
       title = title,
       course = course,
       date = date, 
-
       admin = user_id,
-
       start_time = start_time,
       end_time = end_time,
       location = location, 
       description = description
     )
-
     user.seshs.append(new_session)
-
+    
     db.session.add(new_session)
     db.session.commit()
     return json.dumps(new_session.simple_serialize()), 201
