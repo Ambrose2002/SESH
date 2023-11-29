@@ -110,9 +110,27 @@ def get_user_sesh(user_id):
     pass
 
 
-@app.route("/api/sessions/", methods = ["GET"])
+@app.route("/api/sessions/filter/", methods = ["GET"])
 def get_by_filter():
-    pass
+    """Endpoint for querying sessions by title, course and date"""
+    body = json.loads(request.data)
+    for param in body:
+        if param == "title":
+            title = body.get("title")
+            sessions = Seshs.query.filter(Seshs.title.like(f"%{title}%"))
+        elif param == "course":
+            course = body.get("course")
+            sessions = Seshs.query.filter(Seshs.course.like(f"%{course}%"))
+        elif param == "date":
+            date = body.get("date")
+            sessions = Seshs.query.filter(Seshs.date.like(f"%{date}%"))
+        elif param == "location":
+            location = body.get("location")
+            print(location)
+            sessions = Seshs.query.filter(Seshs.location.like(f"%{location}%"))
+            print(sessions)
+    sessions = [session.simple_serialize() for session in sessions]
+    return json.dumps(sessions), 200
 
 
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["POST"])
