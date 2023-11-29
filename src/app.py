@@ -104,5 +104,27 @@ def delete_session(session_id, user_id):
     db.users.commit()
     return json.dumps(session.simple_serialize()), 200
 
+
+@app.route("/api/sessions/<int:user_id>", methods = ["GET"])
+def get_user_sesh(user_id):
+    pass
+
+
+@app.route("/api/sessions/", methods = ["GET"])
+def get_by_filter():
+    pass
+
+
+@app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["POST"])
+def join_session():
+    pass
+
+
+#Authentication
+#Deployment
+
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
