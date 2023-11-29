@@ -132,10 +132,18 @@ def get_by_filter():
     sessions = [session.simple_serialize() for session in sessions]
     return json.dumps(sessions), 200
 
-
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["POST"])
-def join_session():
-    pass
+def join_session(session_id, user_id):
+    """
+    Endpoint for adding a user to a session
+    """
+    session = Seshs.query.filter_by(id=session_id).first()
+    user = Users.query.filter_by(id=user_id).first()
+    if session is None or user is None:
+        return json.dumps({"error": "Session or User not found!"}), 404
+    user.seshs.append(session)
+    db.users.commit()
+    return json.dumps(session.simple_serialize()), 200
 
 
 #Authentication
