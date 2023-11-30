@@ -56,11 +56,10 @@ class Seshs(db.Model):
     start_time = db.Column(db.String, nullable = False)
     end_time = db.Column(db.String, nullable = False)
     location = db.Column(db.String, nullable = False)
-    number_of_students = db.Column(db.Integer, nullable = True)
     description = db.Column(db.String, nullable = False)
     users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
     admin = db.Column(db.Integer, db.ForeignKey("users.id"), nullable = False) # represents creator of the sesh
-    population = db.Column(db.Integer, autoincrement = True)
+    population = db.Column(db.Integer)
     
     
     def __init__(self, **kwargs):
@@ -73,7 +72,7 @@ class Seshs(db.Model):
         self.end_time = kwargs.get("end_time")
         self.location = kwargs.get("location")
         self.description = kwargs.get("description", "")
-        self.population = 1
+        self.population = 0
         
     
     
@@ -87,8 +86,8 @@ class Seshs(db.Model):
             "start_time": self.start_time,
             "end_time": self.end_time,
             "location": self.location,
-            "population": self.population,
             "description": self.description,
+            "population": self.population,
             "users": [user.simple_serialize() for user in self.users]
         }
         

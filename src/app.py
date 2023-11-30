@@ -88,6 +88,7 @@ def create_session(user_id):
     )
     user.seshs.append(new_session)
     db.session.add(new_session)
+    new_session.population += 1
     db.session.commit()
     return json.dumps(new_session.simple_serialize()), 201
 
@@ -126,9 +127,9 @@ def get_by_filter():
             sessions = Seshs.query.filter(Seshs.date.like(f"%{date}%"))
         elif param == "location":
             location = body.get("location")
-            print(location)
             sessions = Seshs.query.filter(Seshs.location.like(f"%{location}%"))
-            print(sessions)
+        else:
+            return json.dumps({"error": "Session not found"}), 404
     sessions = [session.simple_serialize() for session in sessions]
     return json.dumps(sessions), 200
 
@@ -141,9 +142,12 @@ def join_session(session_id, user_id):
     user = Users.query.filter_by(id=user_id).first()
     if session is None or user is None:
         return json.dumps({"error": "Session or User not found!"}), 404
-    user.seshs.append(session)
-    db.users.commit()
-    return json.dumps(session.simple_serialize()), 200
+    if session not in user.seshs:
+        session.population += 1
+        user.seshs.append(session)
+        db.session.commit()
+        return json.dumps(session.simple_serialize()), 200
+    return json.dumps({"error": "User already in session!"})
 
 
 #Authentication
