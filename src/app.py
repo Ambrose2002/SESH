@@ -161,8 +161,8 @@ def get_sessions():
     return success_response(seshs, 200)
 
 
-@app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
-def create_session(user_id):
+@app.route("/api/sessions/", methods = ["POST"])
+def create_session():
     """
     endpoint for adding a session
     """
@@ -176,23 +176,21 @@ def create_session(user_id):
     body = json.loads(request.data)
     title = body.get("title")
     course = body.get("course")
-    date = body.get("date") 
     start_time = body.get("start_time") 
     end_time = body.get("end_time") 
     location = body.get("location") 
     description = body.get("description")
 
-    args = [title, course, date, start_time, end_time, location]
+    args = [title, course, start_time, end_time, location]
 
     if not all(arg is not None for arg in args):
         return failure_response("Illegal arguments!", 400)
     new_session = Seshs(
       title = title,
       course = course,
-      date = date, 
-      admin = user_id,
-      start_time = start_time,
-      end_time = end_time,
+      admin = user.id,
+      start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'),
+      end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S'),
       location = location, 
       description = description
     )
@@ -203,8 +201,8 @@ def create_session(user_id):
     return success_response(new_session.simple_serialize(), 201)
 
 
-@app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["DELETE"])
-def delete_session(session_id, user_id):
+@app.route("/api/sessions/<int:session_id>/", methods = ["DELETE"])
+def delete_session(session_id):
     """
     Endpoint for deleting a session from a users sessions
     """
@@ -215,7 +213,6 @@ def delete_session(session_id, user_id):
     user = users_dao.get_user_by_session_token(session_token)
     if not user or not user.verify_session_token(session_token):
         return failure_response("Invalid session token")
-    user = Users.query.filter_by(id = user_id).first()
     session = Seshs.query.filter_by(id=session_id).first()
     if session is None or user is None:
         return failure_response("Session or User not found!", 404)
@@ -228,8 +225,8 @@ def delete_session(session_id, user_id):
     return success_response(session.simple_serialize(), 200)
 
 
-@app.route("/api/sessions/<int:user_id>/", methods = ["GET"])
-def get_user_sesh(user_id):
+@app.route("/api/sessions/user/", methods = ["GET"])
+def get_user_sesh():
     """Endpont for getting all the sessions attributed to a user"""
     success, response = extract_token(request)
     if not success:
@@ -238,7 +235,6 @@ def get_user_sesh(user_id):
     user = users_dao.get_user_by_session_token(session_token)
     if not user or not user.verify_session_token(session_token):
         return failure_response("Invalid session token")
-    user = Users.query.filter_by(id = user_id).first()
     sessions = []
     for sesh in user.seshs:
         sessions.append(sesh.simple_serialize())
@@ -256,9 +252,6 @@ def get_by_filter():
         elif param == "course":
             course = body.get("course")
             sessions = Seshs.query.filter(Seshs.course.like(f"%{course}%"))
-        elif param == "date":
-            date = body.get("date")
-            sessions = Seshs.query.filter(Seshs.date.like(f"%{date}%"))
         elif param == "location":
             location = body.get("location")
             sessions = Seshs.query.filter(Seshs.location.like(f"%{location}%"))
@@ -268,13 +261,17 @@ def get_by_filter():
     return success_response(sessions, 200)
 
 
-@app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["POST"])
-def join_session(session_id, user_id):
+@app.route("/api/sessions/<int:session_id>/", methods = ["POST"])
+def join_session(session_id):
     """
     Endpoint for adding a user to a session
     """
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
     session = Seshs.query.filter_by(id=session_id).first()
-    user = Users.query.filter_by(id=user_id).first()
     if session is None or user is None:
         return failure_response("Session or User not found!", 400)
     if session not in user.seshs:
@@ -284,8 +281,6 @@ def join_session(session_id, user_id):
         return success_response(session.simple_serialize(), 200)
     return failure_response("User already in session!")
 
-
-#Authentication
 #Deployment
 
 

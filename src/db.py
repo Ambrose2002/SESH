@@ -104,9 +104,8 @@ class Seshs(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String, nullable = False)
     course = db.Column(db.String, nullable = False)
-    date = db.Column(db.String, nullable = False)
-    start_time = db.Column(db.String, nullable = False)
-    end_time = db.Column(db.String, nullable = False)
+    start_time = db.Column(db.DateTime, nullable = False)
+    end_time = db.Column(db.DateTime, nullable = False)
     location = db.Column(db.String, nullable = False)
     description = db.Column(db.String, nullable = False)
     users = db.relationship("Users", secondary = assoc_table, back_populates = "seshs")
@@ -119,7 +118,6 @@ class Seshs(db.Model):
         self.title = kwargs.get("title")
         self.admin = kwargs.get("admin")  # must be set to user_id in constructor
         self.course = kwargs.get("course")
-        self.date = kwargs.get("date")
         self.start_time = kwargs.get("start_time")
         self.end_time = kwargs.get("end_time")
         self.location = kwargs.get("location")
@@ -127,16 +125,15 @@ class Seshs(db.Model):
         self.population = 0
        
     
-    
+
     def serialize(self):
         """Returns a serialized sesh object"""
         return {
             "id": self.id,
             "title": self.title,
             "course": self.course,
-            "date": self.date,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
+            "start_time": self.start_time.isoformat(),
+            "end_time": self.end_time.isoformat(),
             "location": self.location,
             "description": self.description,
             "population": self.population,
@@ -150,9 +147,8 @@ class Seshs(db.Model):
             "id": self.id,
             "title": self.title,
             "course": self.course,
-            "date": self.date,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
+            "start_time": self.start_time.isoformat(),
+            "end_time": self.end_time.isoformat(),
             "location": self.location,
             "population": self.population,
             "description": self.description,
