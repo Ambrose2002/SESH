@@ -2,6 +2,7 @@ import json
 from db import db
 from db import Users, Seshs
 from flask import Flask, request
+import users_dao
 
 app = Flask(__name__)
 db_filename = "sessions.db"
@@ -14,35 +15,81 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# generalized response formats
+def success_response(data, code=200):
+    """
+    Generalized success response function
+    """
+    return json.dumps(data), code
+
+def failure_response(message, code=404):
+    """
+    Generalized failure response function
+    """
+    return json.dumps({"error": message}), code
+
+def extract_token(request):
+    """
+    Helper function that extracts the token from the header of a request
+    """
+    auth_token = request.headers.get("Authorization")
+    if auth_token is None:
+        return False, failure_response("Missing authorization")
+    
+    bearer_token = auth_token.replace("Bearer", "").strip()
+    if not bearer_token:
+        return False, failure_response("Invalid Authorization header")
+    return True, bearer_token
+
 @app.route("/")
 
 @app.route("/api/users/")
 def get_users():
     """Returns a json of all users"""
     users = [user.serialize() for user in Users.query.all()]
-    return json.dumps(users)
+    return success_response(users, 200)
 
-@app.route("/api/users/", methods= ["POST"])
-def create_user():
+# @app.route("/api/users/", methods= ["POST"])
+# def create_user():
+#     body = json.loads(request.data)
+#     netid = body.get("netid")
+#     if netid is None:
+#         return json.dumps({"error":"Provide netid"}), 400
+#     email = body.get("email")
+#     if email is None:
+#         return failure_response("Provide email")
+#     password= body.get("password")
+#     if password is None:
+#         return json.dumps({"error":"Provide password"}), 400
+
+#     user = Users(
+#         netid = body.get("netid"),
+#         email = body.get("email"), 
+#         password = body.get("password")
+#     )
+#     db.session.add(user)
+#     db.session.commit()
+#     return json.dumps(user.simple_serialize()), 400
+
+@app.route("/register/", methods=["POST"])
+def register_account():
+    """
+    Endpoint for registering a new user
+    """
     body = json.loads(request.data)
-    netid = body.get("netid")
-    if netid is None:
-        return json.dumps({"error":"Provide netid"}), 400
+    first_name = body.get("first_name")
     email = body.get("email")
-    if email is None:
-        return json.dumps({"error":"Provide email"}), 400
-    password= body.get("password")
-    if password is None:
-        return json.dumps({"error":"Provide password"}), 400
-
-    user = Users(
-        netid = body.get("netid"),
-        email = body.get("email"), 
-        password = body.get("password")
-    )
-    db.session.add(user)
-    db.session.commit()
-    return json.dumps(user.simple_serialize()), 400
+    password = body.get("password")
+    
+    if first_name is None or email is None or password is None:
+        return failure_response("Invalid body")
+    created, user = users_dao.create_user(first_name, email, password)
+    
+    if not created:
+        return failure_response("User already exists")
+    return success_response({"session_token": user.session_token,
+                       "session_expiration": str(user.session_expiration),
+                       "update_token": user.update_token})
 
 
 @app.route("/api/sessions/")
@@ -102,14 +149,19 @@ def delete_session(session_id, user_id):
     if session is None or user is None:
         return json.dumps({"error": "Session or User not found!"}), 404
     user.seshs.remove(session)
-    db.users.commit()
+    db.session.commit()
     return json.dumps(session.simple_serialize()), 200
 
 
-@app.route("/api/sessions/<int:user_id>", methods = ["GET"])
+@app.route("/api/sessions/<int:user_id>/", methods = ["GET"])
 def get_user_sesh(user_id):
-    pass
-
+    """Endpont for getting all the sessions attributed to a user"""
+    user = Users.query.filter_by(id = user_id).first()
+    sessions = []
+    for sesh in user.seshs:
+        sessions.append(sesh.simple_serialize())
+    return json.dumps(sessions)
+    
 
 @app.route("/api/sessions/filter/", methods = ["GET"])
 def get_by_filter():
