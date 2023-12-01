@@ -3,6 +3,8 @@ from db import db
 from db import Users, Seshs
 from flask import Flask, request
 import users_dao
+import datetime
+
 
 app = Flask(__name__)
 db_filename = "sessions.db"
@@ -42,34 +44,12 @@ def extract_token(request):
     return True, bearer_token
 
 @app.route("/")
-
 @app.route("/api/users/")
 def get_users():
     """Returns a json of all users"""
     users = [user.serialize() for user in Users.query.all()]
     return success_response(users, 200)
 
-# @app.route("/api/users/", methods= ["POST"])
-# def create_user():
-#     body = json.loads(request.data)
-#     netid = body.get("netid")
-#     if netid is None:
-#         return json.dumps({"error":"Provide netid"}), 400
-#     email = body.get("email")
-#     if email is None:
-#         return failure_response("Provide email")
-#     password= body.get("password")
-#     if password is None:
-#         return json.dumps({"error":"Provide password"}), 400
-
-#     user = Users(
-#         netid = body.get("netid"),
-#         email = body.get("email"), 
-#         password = body.get("password")
-#     )
-#     db.session.add(user)
-#     db.session.commit()
-#     return json.dumps(user.simple_serialize()), 400
 
 @app.route("/register/", methods=["POST"])
 def register_account():
@@ -78,18 +58,98 @@ def register_account():
     """
     body = json.loads(request.data)
     first_name = body.get("first_name")
+    netid = body.get("netid")
     email = body.get("email")
     password = body.get("password")
     
     if first_name is None or email is None or password is None:
         return failure_response("Invalid body")
-    created, user = users_dao.create_user(first_name, email, password)
+    created, user = users_dao.create_user(first_name, netid, email, password)
     
     if not created:
         return failure_response("User already exists")
-    return success_response({"session_token": user.session_token,
+    return success_response({"first_name": first_name,
+                             "netid": netid,
+                             "email": email,
+                             "session_token": user.session_token,
+                             "session_expiration": str(user.session_expiration),
+                             "update_token": user.update_token})
+
+
+@app.route("/login/", methods=["POST"])
+def login():
+    """
+    Endpoint for logging in a user
+    """
+    body = json.loads(request.data)
+    first_name = body.get("first_name")
+    email = body.get("email")
+    password = body.get("password")
+    
+    if email is None or password is None:
+        return failure_response("Invalid body")
+    
+    success, user = users_dao.verify_credentials(email, password)
+    if not success:
+        return failure_response("invalid credentials")
+    user.renew_session()
+    db.session.commit()
+    return json.dumps({"session_token": user.session_token,
                        "session_expiration": str(user.session_expiration),
                        "update_token": user.update_token})
+    
+    
+@app.route("/session/", methods=["POST"])
+def update_session():
+    """
+    Endpoint for updating a user's session
+    """
+    success, response = extract_token(request)
+    if not success:
+        return response
+    update_token = response
+    try:
+        user = users_dao.renew_session(update_token)
+    except Exception as e:
+        return failure_response("Invalid update token")
+    return json.dumps({
+                       "session_token": user.session_token,
+                       "session_expiration": str(user.session_expiration),
+                       "update_token": user.update_token
+    })
+    
+@app.route("/secret/", methods=["GET"])
+def secret_message():
+    """
+    Endpoint for verifying a session token and returning a secret message
+
+    In your project, you will use the same logic for any endpoint that needs 
+    authentication
+    """
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
+    if not user or not user.verify_session_token(session_token):
+        return failure_response("Invalid session token")
+    return success_response("Hello " + user.first_name)
+
+@app.route("/logout/", methods=["POST"])
+def logout():
+    """
+    Endpoint for logging out a user
+    """
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
+    if not user or not user.verify_session_token(session_token):
+        return failure_response("Invalid session token")
+    user.session_expiration = datetime.datetime.now()
+    db.session.commit()
+    return failure_response("You have been logged out")
 
 
 @app.route("/api/sessions/")
@@ -97,19 +157,22 @@ def get_sessions():
     """
     Endpoint for getting all study sessions
     """
-    sessions = []
-    for sesh in Seshs.query.all():
-        sessions.append(sesh.serialize())
-    return json.dumps({"sessions": sessions}), 200
+    seshs = [sesh.serialize() for sesh in Seshs.query.all()]
+    return success_response(seshs, 200)
+
 
 @app.route("/api/sessions/<int:user_id>/", methods = ["POST"])
 def create_session(user_id):
     """
     endpoint for adding a session
     """
-    user = Users.query.filter_by(id = user_id).first()
-    if user is None:
-        return json.dumps({"error": "User not found"}), 404
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
+    if not user or not user.verify_session_token(session_token):
+        return failure_response("Invalid session token")
     body = json.loads(request.data)
     title = body.get("title")
     course = body.get("course")
@@ -122,7 +185,7 @@ def create_session(user_id):
     args = [title, course, date, start_time, end_time, location]
 
     if not all(arg is not None for arg in args):
-        return json.dumps({"error": "Illegal arguments!"}), 400
+        return failure_response("Illegal arguments!", 400)
     new_session = Seshs(
       title = title,
       course = course,
@@ -137,30 +200,49 @@ def create_session(user_id):
     db.session.add(new_session)
     new_session.population += 1
     db.session.commit()
-    return json.dumps(new_session.simple_serialize()), 201
+    return success_response(new_session.simple_serialize(), 201)
+
 
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["DELETE"])
 def delete_session(session_id, user_id):
     """
     Endpoint for deleting a session from a users sessions
     """
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
+    if not user or not user.verify_session_token(session_token):
+        return failure_response("Invalid session token")
+    user = Users.query.filter_by(id = user_id).first()
     session = Seshs.query.filter_by(id=session_id).first()
-    user = Users.query.filter_by(id=user_id).first()
     if session is None or user is None:
-        return json.dumps({"error": "Session or User not found!"}), 404
-    user.seshs.remove(session)
+        return failure_response("Session or User not found!", 404)
+    try:
+        user.seshs.remove(session)
+    except Exception as e:
+        return failure_response("User not in session")
+    session.population-= 1
     db.session.commit()
-    return json.dumps(session.simple_serialize()), 200
+    return success_response(session.simple_serialize(), 200)
 
 
 @app.route("/api/sessions/<int:user_id>/", methods = ["GET"])
 def get_user_sesh(user_id):
     """Endpont for getting all the sessions attributed to a user"""
+    success, response = extract_token(request)
+    if not success:
+        return response
+    session_token = response
+    user = users_dao.get_user_by_session_token(session_token)
+    if not user or not user.verify_session_token(session_token):
+        return failure_response("Invalid session token")
     user = Users.query.filter_by(id = user_id).first()
     sessions = []
     for sesh in user.seshs:
         sessions.append(sesh.simple_serialize())
-    return json.dumps(sessions)
+    return success_response(sessions)
     
 
 @app.route("/api/sessions/filter/", methods = ["GET"])
@@ -181,9 +263,10 @@ def get_by_filter():
             location = body.get("location")
             sessions = Seshs.query.filter(Seshs.location.like(f"%{location}%"))
         else:
-            return json.dumps({"error": "Session not found"}), 404
+            return failure_response("Session not found", 404)
     sessions = [session.simple_serialize() for session in sessions]
-    return json.dumps(sessions), 200
+    return success_response(sessions, 200)
+
 
 @app.route("/api/sessions/<int:session_id>/<int:user_id>/", methods = ["POST"])
 def join_session(session_id, user_id):
@@ -193,19 +276,17 @@ def join_session(session_id, user_id):
     session = Seshs.query.filter_by(id=session_id).first()
     user = Users.query.filter_by(id=user_id).first()
     if session is None or user is None:
-        return json.dumps({"error": "Session or User not found!"}), 404
+        return failure_response("Session or User not found!", 400)
     if session not in user.seshs:
         session.population += 1
         user.seshs.append(session)
         db.session.commit()
-        return json.dumps(session.simple_serialize()), 200
-    return json.dumps({"error": "User already in session!"})
+        return success_response(session.simple_serialize(), 200)
+    return failure_response("User already in session!")
 
 
 #Authentication
 #Deployment
-
-
 
 
 if __name__ == "__main__":

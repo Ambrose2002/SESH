@@ -46,11 +46,12 @@ class Users(db.Model):
         """Returns a serialized users object"""
         return {
             "id": self.id,
+            "first_name": self.first_name,
             "netid": self.netid,
             "email": self.email,
             "seshs": [sesh.simple_serialize() for sesh in self.seshs]        
         }
-      
+    
         
     def simple_serialize(self):
         """Returns a serialized users object without seshs"""
@@ -124,7 +125,7 @@ class Seshs(db.Model):
         self.location = kwargs.get("location")
         self.description = kwargs.get("description", "")
         self.population = 0
-        
+       
     
     
     def serialize(self):
