@@ -1,5 +1,5 @@
-# Register Account
->## POST /register/
+## Register Account
+>### POST /register/
 ```
 request
 
@@ -25,8 +25,9 @@ Response
 }
 ```
 
-# Get all Users in Database
-## GET /api/users/
+
+## Get all Users in Database
+>### GET /api/users/
 ```
 <HTTP STATUS CODE 200>
 Response
@@ -41,8 +42,9 @@ Response
 }
 ```
 
-# Log into account
->## POST /login/
+
+## Log into account
+>### POST /login/
 ```
 request
 
@@ -63,8 +65,9 @@ Response
 }
 ```
 
-# Log out of account
->## POST /logout/
+
+## Log out of account
+>### POST /logout/
 ```
 request
 
@@ -82,8 +85,9 @@ Response
 }
 ```
 
-# Verify Session Token
->## GET /secret/
+
+## Verify Session Token
+>### GET /secret/
 
 ```
 request
@@ -101,8 +105,9 @@ Response
 
 ```
 
-# Get all sessions in Database
->## GET /api/sessions/
+
+## Get all sessions in Database
+>### GET /api/sessions/
 ```
 <HTTP STATUS CODE 200>
 Response
@@ -141,8 +146,9 @@ Response
 ]
 ```
 
-# Create Study session
->## POST /api/sessions/
+
+## Create Study session
+>### POST /api/sessions/
 ```
 request
 {
@@ -176,8 +182,8 @@ Response
 ```
 
 
-# Drop out of a study session
->## DELETE /api/sessions/<int:session_id>/
+## Drop out of a study session
+>### DELETE /api/sessions/<int:session_id>/
 ```
 request
 {
@@ -187,7 +193,7 @@ request
 ```
 
 ```
-<HTTP STATUS CODE 204>
+<HTTP STATUS CODE 200>
 Response
 
 {
@@ -203,8 +209,8 @@ Response
 ```
 
 
-# Get Specific User sessions
->## GET /api/sessions/user/
+## Get Specific User sessions
+>### GET /api/sessions/user/
 
 ```
 request
@@ -232,8 +238,9 @@ Response
 ]
 ```
 
-# Filter all sessions in database by title, or course or location
->## GET /api/sessions/user/
+
+## Filter all sessions in database by title, or course or location
+>### GET /api/sessions/user/
 
 ```
 request
@@ -262,8 +269,8 @@ Response
 ```
 
 
-# Join study session
->## POST /api/sessions/<int:session_id>/
+## Join study session
+>### POST /api/sessions/<int:session_id>/
 
 ```
 request
@@ -288,8 +295,3 @@ Response
     "description": "Studying for FWS Prelim"
 }
 ```
-
-
-
-
-
