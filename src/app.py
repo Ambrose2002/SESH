@@ -133,7 +133,7 @@ def secret_message():
     user = users_dao.get_user_by_session_token(session_token)
     if not user or not user.verify_session_token(session_token):
         return failure_response("Invalid session token")
-    return success_response("Hello " + user.first_name)
+    return success_response({"success":"Hello " + user.first_name})
 
 @app.route("/logout/", methods=["POST"])
 def logout():
@@ -149,7 +149,7 @@ def logout():
         return failure_response("Invalid session token")
     user.session_expiration = datetime.datetime.now()
     db.session.commit()
-    return failure_response("You have been logged out")
+    return success({"success": "You have been logged out"})
 
 
 @app.route("/api/sessions/")
