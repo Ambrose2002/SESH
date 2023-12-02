@@ -240,7 +240,7 @@ Response
 
 
 ## Filter all sessions in database by title, or course or location
->### GET /api/sessions/user/
+>### GET /api/sessions/filter/
 
 ```
 request
