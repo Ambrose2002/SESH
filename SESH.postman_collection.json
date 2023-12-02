@@ -1,0 +1,319 @@
+{
+	"info": {
+		"_postman_id": "9fdd039e-3bff-4b53-9e8c-5a30efe0933f",
+		"name": "SESH",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30345061",
+		"_collection_link": "https://grey-spaceship-379791.postman.co/workspace/intro-to-backend~a029e6fd-d2e1-4456-859e-6538a912b507/collection/30345061-9fdd039e-3bff-4b53-9e8c-5a30efe0933f?action=share&source=collection_link&creator=30345061"
+	},
+	"item": [
+		{
+			"name": "secret",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "7cb50a1a88808fb558ca2ce4d59b61ac942ea20c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/secret/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"secret",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "a649a74ef60c152b231d7b61a28ebde32ea16c76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/logout/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"logout",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"ambrose2002blay@gmail.com\",\n    \"password\": \"Ab0209282124.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\": \"Ambrose\",\n    \"email\": \"fdsaf@gmail.com\", \n    \"password\": \"ab0209282124\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/register/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"register",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_all_users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://10.49.98.236:8000/api/users/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"49",
+						"98",
+						"236"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_all_seshs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://10.49.98.236:8000/api/seshs/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"49",
+						"98",
+						"236"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"seshs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_sesh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"CS Prelim\",\n    \"course\": \"CS1110\",\n    \"date\": \"21st November, 2023\",\n    \"start_time\": \"4:00 pm\",\n    \"end_time\": \"6:00 pm\",\n    \"location\": \"Uris Library\",\n    \"description\": \"Studying for CS Prelim\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://10.49.98.236:8000/api/seshs/1/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"49",
+						"98",
+						"236"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"seshs",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter_sessions",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"CS\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/sessions/filter/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"sessions",
+						"filter",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "join_session",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "leave_session",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/sessions/1/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"sessions",
+						"1",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_user_seshs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/sessions/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"sessions",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
