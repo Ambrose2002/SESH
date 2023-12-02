@@ -81,7 +81,7 @@ request
 Response
 
 {
-    "error": "You have been logged out"
+    "success": "You have been logged out"
 }
 ```
 
@@ -101,7 +101,9 @@ request
 <HTTP STATUS CODE 200>
 Response
 
-"Hello {first_name}"
+{
+    "success":"Hello {first_name}
+}
 
 ```
 
